@@ -129,6 +129,8 @@ function computePrediction(metric: string): number {
 function main() {
   console.log("Player agent started – listening for rounds...");
   subscribeToRounds();
+  // Keep process alive
+  setInterval(() => {}, 1000 * 60 * 60);
 }
 
 main();

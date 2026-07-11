@@ -1,4 +1,4 @@
-const RELAY_URL = "wss://relay.nostr.org";
+const RELAY_URL = "wss://relay.damus.io";
 
 document.addEventListener("DOMContentLoaded", () => {
     const statusText = document.getElementById("connection-status");
