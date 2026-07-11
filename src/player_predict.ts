@@ -29,7 +29,7 @@ const pool = new SimplePool();
 
 // Subscribe to round announcements (kind 1 events with "metric" tag)
 function subscribeToRounds() {
-  const sub = pool.sub([NOSTR_RELAY_URL], [{ kinds: [1] }]);
+  const sub = pool.sub([NOSTR_RELAY_URL], [{ kinds: [1], since: Math.floor(Date.now() / 1000) }]);
 
   sub.on("event", async (event: any) => {
     const tags = Object.fromEntries(event.tags.map((t: any) => [t[0], t.slice(1)]));
