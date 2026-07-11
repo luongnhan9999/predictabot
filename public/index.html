@@ -3,99 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PredictaBot Arena | Premium Dashboard</title>
+    <title>PredictaBot Arena | Autonomous Prediction Market on Unicity</title>
+    <meta name="description" content="Real-time autonomous macroeconomic prediction market powered by Unicity Testnet v2 and Nostr protocol">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Chart.js for Live Data Visualization -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="ambient-background">
+    <!-- Animated Background -->
+    <div class="ambient-bg">
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
-        <div class="grid-overlay"></div>
+        <div class="orb orb-4"></div>
+        <canvas id="particleCanvas"></canvas>
+        <div class="grid-perspective"></div>
     </div>
 
-    <div class="app-container">
-        <!-- HEADER -->
-        <header class="glass-panel">
-            <div class="logo-area">
-                <div class="logo-icon">🔮</div>
-                <div>
-                    <h1>PredictaBot <span class="highlight">Arena</span></h1>
-                    <p class="subtitle">Autonomous Market Intelligence</p>
+    <div class="app-shell">
+        <!-- ===== TOP NAV BAR ===== -->
+        <nav class="topbar glass">
+            <div class="topbar-left">
+                <div class="logo">
+                    <div class="logo-glyph">
+                        <svg viewBox="0 0 40 40" width="36" height="36">
+                            <defs>
+                                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#00f0ff"/>
+                                    <stop offset="100%" style="stop-color:#a855f7"/>
+                                </linearGradient>
+                            </defs>
+                            <polygon points="20,2 38,14 32,36 8,36 2,14" fill="none" stroke="url(#logoGrad)" stroke-width="2.5"/>
+                            <circle cx="20" cy="20" r="6" fill="url(#logoGrad)" opacity="0.8"/>
+                            <line x1="20" y1="14" x2="20" y2="2" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.5"/>
+                            <line x1="26" y1="20" x2="38" y2="14" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.5"/>
+                            <line x1="24" y1="25" x2="32" y2="36" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.5"/>
+                            <line x1="16" y1="25" x2="8" y2="36" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.5"/>
+                            <line x1="14" y1="20" x2="2" y2="14" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <h1>PredictaBot <span class="gradient-text">Arena</span></h1>
+                        <span class="logo-sub">Autonomous Market Intelligence · Unicity Testnet v2</span>
+                    </div>
                 </div>
             </div>
-            <div class="network-status">
-                <div class="status-pill">
-                    <div class="pulse-dot"></div>
-                    <span id="connection-status">Connecting to Nodes...</span>
+            <div class="topbar-right">
+                <div class="nav-stats">
+                    <div class="nav-stat">
+                        <span class="nav-stat-label">Rounds</span>
+                        <span class="nav-stat-value" id="nav-rounds">0</span>
+                    </div>
+                    <div class="nav-stat">
+                        <span class="nav-stat-label">Players</span>
+                        <span class="nav-stat-value" id="nav-players">0</span>
+                    </div>
+                    <div class="nav-stat">
+                        <span class="nav-stat-label">Intents</span>
+                        <span class="nav-stat-value" id="nav-intents">0</span>
+                    </div>
+                </div>
+                <div class="connection-badge" id="connection-badge">
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-core"></div>
+                    <span id="connection-status">Initializing</span>
                 </div>
             </div>
-        </header>
+        </nav>
 
-        <!-- MAIN 3-COLUMN LAYOUT -->
-        <main class="dashboard-grid">
-            
-            <!-- LEFT PANEL: Active Rounds & Network -->
-            <aside class="side-panel left-panel">
-                <div class="glass-panel stretch-panel">
-                    <div class="panel-header">
-                        <h2><span class="icon">⚡</span> Active Rounds</h2>
+        <!-- ===== MAIN DASHBOARD ===== -->
+        <main class="dashboard">
+
+            <!-- ROW 1: KPI Cards -->
+            <section class="kpi-row">
+                <div class="kpi-card glass" id="kpi-gas">
+                    <div class="kpi-icon">⛽</div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Total Gas</span>
+                        <span class="kpi-value" id="kpi-gas-value">--</span>
+                        <span class="kpi-delta positive" id="kpi-gas-delta">--</span>
                     </div>
-                    <div id="rounds-container" class="scrollable-content">
-                        <!-- High-tech Empty State -->
-                        <div class="tech-empty-state">
-                            <div class="scanner-bar"></div>
-                            <p>Awaiting Game Master Oracle...</p>
-                        </div>
+                    <div class="kpi-spark"><canvas id="spark-gas" width="80" height="32"></canvas></div>
+                </div>
+                <div class="kpi-card glass" id="kpi-nametags">
+                    <div class="kpi-icon">🏷️</div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Active Nametags</span>
+                        <span class="kpi-value" id="kpi-nametags-value">--</span>
+                        <span class="kpi-delta positive" id="kpi-nametags-delta">--</span>
+                    </div>
+                    <div class="kpi-spark"><canvas id="spark-nametags" width="80" height="32"></canvas></div>
+                </div>
+                <div class="kpi-card glass" id="kpi-interval">
+                    <div class="kpi-icon">⏱️</div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Avg Block Interval</span>
+                        <span class="kpi-value" id="kpi-interval-value">--</span>
+                        <span class="kpi-delta positive" id="kpi-interval-delta">--</span>
+                    </div>
+                    <div class="kpi-spark"><canvas id="spark-interval" width="80" height="32"></canvas></div>
+                </div>
+                <div class="kpi-card glass accent" id="kpi-accuracy">
+                    <div class="kpi-icon">🎯</div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Prediction Accuracy</span>
+                        <span class="kpi-value" id="kpi-accuracy-value">--</span>
+                        <span class="kpi-delta" id="kpi-accuracy-delta">Analyzing...</span>
+                    </div>
+                    <div class="kpi-ring">
+                        <svg viewBox="0 0 36 36" width="48" height="48">
+                            <path d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                  fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+                            <path id="accuracy-ring" d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                  fill="none" stroke="url(#logoGrad)" stroke-width="3"
+                                  stroke-dasharray="0, 100" stroke-linecap="round"/>
+                        </svg>
                     </div>
                 </div>
-            </aside>
+            </section>
 
-            <!-- CENTER PANEL: Live Chart -->
-            <section class="center-panel">
-                <div class="glass-panel chart-panel">
-                    <div class="panel-header chart-header">
-                        <h2><span class="icon">📈</span> Live Prediction Index</h2>
-                        <div class="metric-selector">
-                            <span class="active-metric-label">totalGas</span>
+            <!-- ROW 2: Chart + Sidebar -->
+            <section class="main-row">
+                <!-- LEFT: Live Chart -->
+                <div class="chart-zone glass">
+                    <div class="chart-toolbar">
+                        <div class="chart-title">
+                            <h2>Live Prediction Index</h2>
+                            <span class="chart-subtitle" id="chart-subtitle">Waiting for data...</span>
+                        </div>
+                        <div class="metric-tabs" id="metric-tabs">
+                            <button class="metric-tab active" data-metric="totalGas">Total Gas</button>
+                            <button class="metric-tab" data-metric="activeNametags">Nametags</button>
+                            <button class="metric-tab" data-metric="avgBlockInterval">Block Interval</button>
                         </div>
                     </div>
-                    <div class="chart-container">
+                    <div class="chart-canvas-wrap">
                         <canvas id="predictionChart"></canvas>
                     </div>
-                    <div class="chart-stats">
-                        <div class="stat-box">
-                            <span class="stat-label">Total Predictions</span>
-                            <span class="stat-value" id="stat-total">0</span>
+                    <div class="chart-footer">
+                        <div class="chart-stat">
+                            <span class="chart-stat-label">Total Events</span>
+                            <span class="chart-stat-value" id="stat-total">0</span>
                         </div>
-                        <div class="stat-box">
-                            <span class="stat-label">Current Consensus</span>
-                            <span class="stat-value" id="stat-avg">--</span>
+                        <div class="chart-stat">
+                            <span class="chart-stat-label">Current Consensus</span>
+                            <span class="chart-stat-value gradient-text" id="stat-avg">--</span>
+                        </div>
+                        <div class="chart-stat">
+                            <span class="chart-stat-label">Last Update</span>
+                            <span class="chart-stat-value" id="stat-last-update">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Sidebar -->
+                <div class="sidebar">
+                    <!-- Active Rounds -->
+                    <div class="sidebar-panel glass">
+                        <div class="panel-head">
+                            <h3><span class="head-icon">⚡</span> Active Rounds</h3>
+                            <span class="counter" id="rounds-count">0</span>
+                        </div>
+                        <div class="panel-scroll" id="rounds-container">
+                            <div class="empty-state">
+                                <div class="scanner-line"></div>
+                                <p>Awaiting Game Master Oracle...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leaderboard -->
+                    <div class="sidebar-panel glass">
+                        <div class="panel-head">
+                            <h3><span class="head-icon">🏆</span> Leaderboard</h3>
+                        </div>
+                        <div class="panel-scroll" id="leaderboard-container">
+                            <div class="empty-state">
+                                <div class="scanner-line"></div>
+                                <p>Ranking players...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- RIGHT PANEL: Live Intents Stream -->
-            <aside class="side-panel right-panel">
-                <div class="glass-panel stretch-panel">
-                    <div class="panel-header">
-                        <h2><span class="icon">🧠</span> Global Intents</h2>
+            <!-- ROW 3: Intent Feed -->
+            <section class="feed-row">
+                <div class="feed-panel glass">
+                    <div class="panel-head">
+                        <h3><span class="head-icon">🧠</span> Live Intent Stream</h3>
+                        <span class="counter" id="intents-count">0</span>
                     </div>
-                    <div id="intents-container" class="scrollable-content">
-                        <!-- High-tech Empty State -->
-                        <div class="tech-empty-state">
-                            <div class="scanner-bar"></div>
+                    <div class="feed-scroll" id="intents-container">
+                        <div class="empty-state">
+                            <div class="scanner-line"></div>
                             <p>Scanning for Player signals...</p>
                         </div>
                     </div>
                 </div>
-            </aside>
-
+            </section>
         </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>PredictaBot Arena v0.1.0</span>
+            <span>Powered by <strong class="gradient-text">Unicity Testnet v2</strong> + <strong class="gradient-text">Nostr Protocol</strong></span>
+            <span>Built with ❤️ by luongnhan</span>
+        </footer>
     </div>
 
     <script src="app.js"></script>
