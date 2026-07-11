@@ -835,6 +835,7 @@ body {
     overflow: hidden;
     position: relative;
     border-left: 3px solid var(--amber);
+    flex-shrink: 0;
 }
 
 .round-card:hover {
