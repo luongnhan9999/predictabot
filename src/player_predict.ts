@@ -7,7 +7,7 @@
 
 import { SDK, Escrow, Intent, Wallet } from "./mock-sdk";
 import { SimplePool, getEventHash, getSignature } from "nostr-tools";
-import { NOSTR_RELAY_URL, PLAYER_PRIVATE_KEY, TESTNET_RPC, ESCROW_CONTRACT_ADDRESS } from "./config";
+import { NOSTR_RELAY_URL, PLAYER_PRIVATE_KEY, TESTNET_RPC, ESCROW_CONTRACT_ADDRESS, GM_PRIVATE_KEY } from "./config";
 import { placeholderPredict, roundTo } from "./utils";
 
 // Helper to convert hex private key to Uint8Array for nostr-tools
