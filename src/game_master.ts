@@ -141,6 +141,10 @@ async function fetchPredictions(roundId: string): Promise<Intent[]> {
 }
 
 async function main() {
+  console.log("Game Master agent started.");
+  console.log("Waiting 3s for Nostr relay connections...");
+  await new Promise(resolve => setTimeout(resolve, 3000));
+
   const metrics = ["totalGas", "activeNametags", "avgBlockInterval"];
   let idx = 0;
   while (true) {
