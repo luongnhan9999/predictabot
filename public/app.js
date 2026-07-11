@@ -80,7 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
             indicator.classList.add("connected");
             
             const subId = "sub_" + Math.floor(Math.random() * 100000);
-            const req = ["REQ", subId, { kinds: [1], limit: 100 }];
+            const GM_PUBKEY = "b3d36877daf229f950e33f579838e267426589a0f71128f4176b8ceda764985d";
+            const req = ["REQ", subId, { kinds: [1], authors: [GM_PUBKEY], limit: 100 }];
             socket.send(JSON.stringify(req));
         };
 

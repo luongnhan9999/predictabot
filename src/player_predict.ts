@@ -26,10 +26,16 @@ const playerWallet = new Wallet(PLAYER_PRIVATE_KEY);
 
 // Nostr pool for round announcements
 const pool = new SimplePool();
+const gmWallet = new Wallet(GM_PRIVATE_KEY);
+const gmPubkey = gmWallet.getPublicKey();
 
 // Subscribe to round announcements (kind 1 events with "metric" tag)
 function subscribeToRounds() {
-  const sub = pool.sub([NOSTR_RELAY_URL], [{ kinds: [1] }]);
+  const sub = pool.sub([NOSTR_RELAY_URL], [{ 
+    kinds: [1], 
+    authors: [gmPubkey],
+    since: Math.floor(Date.now() / 1000)
+  }]);
 
   sub.on("event", async (event: any) => {
     const tags = Object.fromEntries(event.tags.map((t: any) => [t[0], t.slice(1)]));
