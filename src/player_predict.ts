@@ -70,7 +70,14 @@ function subscribeToRounds() {
       pubkey: playerWallet.getPublicKey()
     } as any;
     const signed = (signEvent as any)(nostrEvent, PLAYER_PRIVATE_KEY);
-    await pool.publish([NOSTR_RELAY_URL], signed);
+    try {
+      const pub = pool.publish([NOSTR_RELAY_URL], signed);
+      if (Array.isArray(pub)) {
+        pub.forEach(p => p.catch(() => {}));
+      } else if (pub && typeof pub.catch === 'function') {
+        pub.catch(() => {});
+      }
+    } catch (e) {}
   });
 
   sub.on("eose", () => console.log("Subscribed to round announcements"));

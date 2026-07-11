@@ -1,24 +1,86 @@
-const RELAY_URL = "wss://relay.damus.io";
+const RELAY_URL = "wss://relay.nostr.org";
 
 document.addEventListener("DOMContentLoaded", () => {
     const statusText = document.getElementById("connection-status");
-    const indicator = document.querySelector(".status-indicator");
+    const indicator = document.querySelector(".status-pill");
     const roundsContainer = document.getElementById("rounds-container");
     const intentsContainer = document.getElementById("intents-container");
+    
+    // Stats
+    const statTotal = document.getElementById("stat-total");
+    const statAvg = document.getElementById("stat-avg");
 
     let rounds = new Map();
     let socket;
+    
+    // --- CHART.JS SETUP ---
+    const ctx = document.getElementById('predictionChart').getContext('2d');
+    
+    // Gradient for line
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(0, 240, 255, 0.5)'); // Neon Cyan
+    gradient.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
 
+    const chartConfig = {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Prediction Value',
+                data: [],
+                borderColor: '#00f0ff',
+                backgroundColor: gradient,
+                borderWidth: 2,
+                pointBackgroundColor: '#8a2be2',
+                pointBorderColor: '#fff',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.4 // Smooth curves
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 15, 25, 0.9)',
+                    titleFont: { family: 'JetBrains Mono' },
+                    bodyFont: { family: 'JetBrains Mono' },
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+                    ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+                },
+                y: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
+                    ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 11 } },
+                    beginAtZero: false
+                }
+            },
+            animation: { duration: 800, easing: 'easeOutQuart' }
+        }
+    };
+    
+    const liveChart = new Chart(ctx, chartConfig);
+    let totalIntents = 0;
+    let predictionSum = 0;
+
+    // --- NOSTR WEBSOCKET ---
     function connect() {
         socket = new WebSocket(RELAY_URL);
 
         socket.onopen = () => {
-            statusText.textContent = "Connected to Damus Relay";
+            statusText.textContent = "Connected to Damus";
             indicator.classList.add("connected");
             
-            // Subscribe to kind 1 events that have 'e' or 'metric' tags (basic filter)
             const subId = "sub_" + Math.floor(Math.random() * 100000);
-            const req = ["REQ", subId, { kinds: [1], limit: 50 }];
+            const req = ["REQ", subId, { kinds: [1], limit: 100 }];
             socket.send(JSON.stringify(req));
         };
 
@@ -30,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         socket.onclose = () => {
-            statusText.textContent = "Disconnected. Reconnecting...";
+            statusText.textContent = "Reconnecting...";
             indicator.classList.remove("connected");
             setTimeout(connect, 3000);
         };
@@ -39,74 +101,116 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleEvent(event) {
         const tags = Object.fromEntries(event.tags.map(t => [t[0], t.slice(1)]));
 
-        // It's a GM Round Announcement
+        // GM Round Announcement
         if (tags["metric"]) {
             const roundId = tags["e"]?.[0];
             if (!roundId) return;
 
-            // Only add if we haven't seen it recently to avoid flickering
             if (!rounds.has(roundId)) {
                 rounds.set(roundId, event);
                 renderRound(roundId, tags);
             }
         } 
-        // It's a Player Prediction Intent
+        // Player Prediction Intent
         else if (tags["intent"] && tags["prediction"]) {
             const roundId = tags["e"]?.[0];
             const intentId = tags["intent"]?.[0];
-            const prediction = tags["prediction"]?.[0];
+            const predictionVal = parseFloat(tags["prediction"]?.[0]);
             
-            renderIntent(roundId, event.pubkey, prediction);
+            renderIntent(intentId, pubkeyShort(event.pubkey), predictionVal);
+            updateChart(predictionVal);
         }
+    }
+
+    // --- UI UPDATES ---
+    function pubkeyShort(pk) {
+        return pk ? pk.substring(0, 6) + '..' + pk.substring(pk.length-4) : 'unknown';
+    }
+
+    function clearEmptyState(container) {
+        const empty = container.querySelector(".tech-empty-state");
+        if (empty) empty.remove();
     }
 
     function renderRound(id, tags) {
-        // Clear empty state if needed
-        const emptyState = roundsContainer.querySelector(".empty-state");
-        if (emptyState) emptyState.remove();
+        clearEmptyState(roundsContainer);
 
         const card = document.createElement("div");
-        card.className = "round-card";
+        card.className = "card round";
+        
+        const metric = tags["metric"][0] || "Unknown";
+        const blocks = `${tags["startBlock"]?.[0]}-${tags["endBlock"]?.[0]}`;
+
         card.innerHTML = `
-            <div class="round-header">
-                <span class="round-id">${id.substring(0, 16)}...</span>
-                <span class="badge">${tags["metric"][0]}</span>
+            <div class="card-header">
+                <span>ROUND <span class="hash">${id.substring(0, 8)}</span></span>
+                <span class="badge">${metric}</span>
             </div>
-            <div class="round-details">
-                <p>Blocks: <strong>${tags["startBlock"]?.[0]} - ${tags["endBlock"]?.[0]}</strong></p>
-                <p>Stake Req: <strong>${tags["stake"]?.[0]} tokens</strong></p>
+            <div class="card-body">
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-tertiary); margin-bottom: 4px;">Blocks</div>
+                    <div style="font-family: var(--font-mono); font-size: 0.9rem;">${blocks}</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-tertiary); margin-bottom: 4px; text-align: right;">Stake</div>
+                    <div style="color: var(--warning); font-family: var(--font-mono);">${tags["stake"]?.[0] || 0} UNI</div>
+                </div>
             </div>
         `;
         
-        // Prepend to show newest first
         roundsContainer.prepend(card);
-
-        // Keep only top 10 to prevent DOM bloat
-        if (roundsContainer.children.length > 10) {
-            roundsContainer.lastChild.remove();
-        }
+        if (roundsContainer.children.length > 20) roundsContainer.lastChild.remove();
     }
 
-    function renderIntent(roundId, pubkey, prediction) {
-        const emptyState = intentsContainer.querySelector(".empty-state");
-        if (emptyState) emptyState.remove();
+    function renderIntent(intentId, playerShort, prediction) {
+        clearEmptyState(intentsContainer);
 
-        const item = document.createElement("div");
-        item.className = "intent-item";
-        item.innerHTML = `
-            <div>
-                <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Round: ${roundId.substring(0,8)}...</p>
-                <span class="intent-player">Player: ${pubkey.substring(0, 8)}...</span>
+        const card = document.createElement("div");
+        card.className = "card intent";
+        
+        card.innerHTML = `
+            <div class="card-header">
+                <span>INTENT <span class="hash">${(intentId || "").substring(0, 8)}</span></span>
+                <span>${playerShort}</span>
             </div>
-            <div class="intent-value">${prediction}</div>
+            <div class="card-body">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Predicted Value</div>
+                <div class="card-value">${prediction.toLocaleString()}</div>
+            </div>
         `;
         
-        intentsContainer.prepend(item);
-
-        if (intentsContainer.children.length > 15) {
-            intentsContainer.lastChild.remove();
-        }
+        intentsContainer.prepend(card);
+        if (intentsContainer.children.length > 20) intentsContainer.lastChild.remove();
     }
 
+    function updateChart(value) {
+        if (isNaN(value)) return;
+        
+        totalIntents++;
+        predictionSum += value;
+        
+        // Update Stats UI
+        statTotal.textContent = totalIntents;
+        statAvg.textContent = Math.round(predictionSum / totalIntents).toLocaleString();
+
+        // Add to Chart
+        const now = new Date();
+        const timeLabel = now.getHours().toString().padStart(2, '0') + ':' + 
+                          now.getMinutes().toString().padStart(2, '0') + ':' + 
+                          now.getSeconds().toString().padStart(2, '0');
+
+        liveChart.data.labels.push(timeLabel);
+        liveChart.data.datasets[0].data.push(value);
+
+        // Keep last 30 data points
+        if (liveChart.data.labels.length > 30) {
+            liveChart.data.labels.shift();
+            liveChart.data.datasets[0].data.shift();
+        }
+
+        liveChart.update('none'); // Update without full animation for smoother stream
+    }
+
+    // Initialize
     connect();
 });

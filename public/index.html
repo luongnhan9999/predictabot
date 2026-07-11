@@ -3,40 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PredictaBot - Live Dashboard</title>
+    <title>PredictaBot Arena | Premium Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for Live Data Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="background-effects">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
+    <div class="ambient-background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="grid-overlay"></div>
     </div>
 
-    <div class="container">
-        <header>
-            <h1>PredictaBot <span>Arena</span></h1>
-            <p>Live Autonomous Prediction Market</p>
-            <div class="status-indicator">
-                <div class="pulse"></div>
-                <span id="connection-status">Connecting to Relay...</span>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="glass-panel">
+            <div class="logo-area">
+                <div class="logo-icon">🔮</div>
+                <div>
+                    <h1>PredictaBot <span class="highlight">Arena</span></h1>
+                    <p class="subtitle">Autonomous Market Intelligence</p>
+                </div>
+            </div>
+            <div class="network-status">
+                <div class="status-pill">
+                    <div class="pulse-dot"></div>
+                    <span id="connection-status">Connecting to Nodes...</span>
+                </div>
             </div>
         </header>
 
-        <main>
-            <section class="panel active-rounds">
-                <h2><i class="icon">🔥</i> Active Rounds</h2>
-                <div id="rounds-container" class="grid-container">
-                    <div class="empty-state">Waiting for GM to announce rounds...</div>
+        <!-- MAIN 3-COLUMN LAYOUT -->
+        <main class="dashboard-grid">
+            
+            <!-- LEFT PANEL: Active Rounds & Network -->
+            <aside class="side-panel left-panel">
+                <div class="glass-panel stretch-panel">
+                    <div class="panel-header">
+                        <h2><span class="icon">⚡</span> Active Rounds</h2>
+                    </div>
+                    <div id="rounds-container" class="scrollable-content">
+                        <!-- High-tech Empty State -->
+                        <div class="tech-empty-state">
+                            <div class="scanner-bar"></div>
+                            <p>Awaiting Game Master Oracle...</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- CENTER PANEL: Live Chart -->
+            <section class="center-panel">
+                <div class="glass-panel chart-panel">
+                    <div class="panel-header chart-header">
+                        <h2><span class="icon">📈</span> Live Prediction Index</h2>
+                        <div class="metric-selector">
+                            <span class="active-metric-label">totalGas</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="predictionChart"></canvas>
+                    </div>
+                    <div class="chart-stats">
+                        <div class="stat-box">
+                            <span class="stat-label">Total Predictions</span>
+                            <span class="stat-value" id="stat-total">0</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Current Consensus</span>
+                            <span class="stat-value" id="stat-avg">--</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <section class="panel predictions">
-                <h2><i class="icon">🧠</i> Latest Intents</h2>
-                <div id="intents-container" class="list-container">
-                    <div class="empty-state">Waiting for players to submit intents...</div>
+            <!-- RIGHT PANEL: Live Intents Stream -->
+            <aside class="side-panel right-panel">
+                <div class="glass-panel stretch-panel">
+                    <div class="panel-header">
+                        <h2><span class="icon">🧠</span> Global Intents</h2>
+                    </div>
+                    <div id="intents-container" class="scrollable-content">
+                        <!-- High-tech Empty State -->
+                        <div class="tech-empty-state">
+                            <div class="scanner-bar"></div>
+                            <p>Scanning for Player signals...</p>
+                        </div>
+                    </div>
                 </div>
-            </section>
+            </aside>
+
         </main>
     </div>
 

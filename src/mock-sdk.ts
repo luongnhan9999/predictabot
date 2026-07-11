@@ -1,11 +1,17 @@
+import { getPublicKey } from "nostr-tools";
+
 export class Wallet {
   private key: string;
   constructor(privateKey: string) {
     this.key = privateKey;
   }
   getPublicKey(): string {
-    // Nostr pubkey must be 64-char hex string
-    return "0000000000000000000000000000000000000000000000000000000000000000";
+    // Generate valid pubkey from privkey so Nostr relays don't reject signatures
+    try {
+      return getPublicKey(this.key);
+    } catch (e) {
+      return "0000000000000000000000000000000000000000000000000000000000000000";
+    }
   }
   getAddress(): string {
     return "mock_address_" + this.key.substring(0, 6);

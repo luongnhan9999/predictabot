@@ -27,8 +27,14 @@ const pool = new SimplePool();
 
 
 function publish(event: any) {
-  // Publish to configured relay URL (array as per nostr-tools API)
-  return pool.publish([NOSTR_RELAY_URL], event);
+  try {
+    const pub = pool.publish([NOSTR_RELAY_URL], event);
+    if (Array.isArray(pub)) {
+      pub.forEach(p => p.catch(() => {}));
+    } else if (pub && typeof pub.catch === 'function') {
+      pub.catch(() => {});
+    }
+  } catch (e) {}
 }
 
 interface RoundSpec {
