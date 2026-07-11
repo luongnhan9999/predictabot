@@ -147,7 +147,7 @@ async function main() {
 
   // Simple HTTP server to bind to port for hosting on platforms like Render
   const port = process.env.PORT || 3000;
-  http.createServer((req, res) => {
+  http.createServer((req: any, res: any) => {
     res.writeHead(200, { "Content-Type": "text/plain" });
     res.end("PredictaBot Backend Bots are running!");
   }).listen(port, () => {
