@@ -1,4 +1,4 @@
-const RELAY_URL = "wss://relay.primal.net";
+const RELAY_URL = "wss://relay.snort.social";
 
 document.addEventListener("DOMContentLoaded", () => {
     const statusText = document.getElementById("connection-status");
