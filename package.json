@@ -1,0 +1,26 @@
+{
+  "name": "predictabot",
+  "version": "0.1.0",
+  "description": "Autonomous macroeconomic prediction market for Unicity Testnet v2",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start-gm": "ts-node src/game_master.ts",
+    "start-player": "ts-node src/player_predict.ts",
+    "test": "jest"
+  },
+  "author": "Your Name <you@example.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@unicity/sphere-sdk": "git+https://github.com/unicity-sphere/sphere-sdk.git",
+    "nostr-tools": "^1.15.0",
+    "dotenv": "^16.0.0",
+    "axios": "^1.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.0",
+    "ts-node": "^10.9.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.0"
+  }
+}
