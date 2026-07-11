@@ -411,21 +411,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="round-time">${formatTime(timestamp)}</span>
             </div>
             <div class="round-body">
-                <div class="round-metric">
-                    <span class="round-metric-label">Metric</span>
-                    <span class="round-metric-value">${label}</span>
-                </div>
-                <div class="round-blocks">
-                    <span class="round-blocks-label">Blocks</span>
-                    <span class="round-blocks-value">${startBlock} → ${endBlock} <span class="round-blocks-count">(${blockCount})</span></span>
-                </div>
-            </div>
-            <div class="round-footer">
-                <div class="round-stake">
-                    <span class="round-stake-icon">💰</span>
-                    <span class="round-stake-amount">${Number(stake).toLocaleString()} UNI</span>
-                </div>
-                <span class="round-status">● Live</span>
+                <span class="round-metric-value">${label}</span>
+                <span class="round-blocks-value">${startBlock}→${endBlock}</span>
+                <span class="round-stake-amount">${stake} UNI</span>
             </div>
         `;
         roundsContainer.prepend(card);
