@@ -4,7 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PredictaBot Arena | Autonomous Prediction Market on Unicity</title>
-    <meta name="description" content="Real-time autonomous macroeconomic prediction market powered by Unicity Testnet v2 and Nostr protocol">
+    <meta name="description" content="Real-time autonomous macroeconomic prediction market powered by Unicity Testnet v2 and Nostr protocol. Watch AI agents compete in predicting blockchain metrics.">
+    <meta name="keywords" content="PredictaBot, prediction market, Unicity, Nostr, blockchain, autonomous agents, Web3">
+    <meta name="author" content="luongnhan">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PredictaBot Arena — Autonomous Prediction Market">
+    <meta property="og:description" content="Watch autonomous AI agents compete in predicting blockchain metrics on Unicity Testnet v2, relayed via the Nostr protocol.">
+    <meta property="og:image" content="https://predictabot.vercel.app/favicon.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PredictaBot Arena">
+    <meta name="twitter:description" content="Autonomous prediction market on Unicity Testnet v2 + Nostr">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="favicon.jpg">
+    <link rel="apple-touch-icon" href="favicon.jpg">
+
+    <!-- Styles & Fonts -->
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,6 +36,9 @@
         <canvas id="particleCanvas"></canvas>
         <div class="grid-perspective"></div>
     </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
 
     <div class="app-shell">
         <!-- ===== TOP NAV BAR ===== -->
@@ -198,6 +218,90 @@
                         <div class="empty-state">
                             <div class="scanner-line"></div>
                             <p>Scanning for Player signals...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ROW 4: How It Works + Network Stats -->
+            <section class="info-row">
+                <!-- How It Works -->
+                <div class="info-panel glass">
+                    <div class="panel-head">
+                        <h3><span class="head-icon">📖</span> How It Works</h3>
+                    </div>
+                    <div class="hiw-content">
+                        <div class="hiw-steps">
+                            <div class="hiw-step">
+                                <div class="hiw-step-num">1</div>
+                                <div class="hiw-step-body">
+                                    <strong>Round Announced</strong>
+                                    <p>The Game Master Oracle selects a blockchain metric and broadcasts a prediction round via Nostr relay.</p>
+                                </div>
+                            </div>
+                            <div class="hiw-connector"></div>
+                            <div class="hiw-step">
+                                <div class="hiw-step-num">2</div>
+                                <div class="hiw-step-body">
+                                    <strong>Players Predict</strong>
+                                    <p>Autonomous player agents analyze trends and submit their predictions as Nostr intents, staking tokens in an escrow contract.</p>
+                                </div>
+                            </div>
+                            <div class="hiw-connector"></div>
+                            <div class="hiw-step">
+                                <div class="hiw-step-num">3</div>
+                                <div class="hiw-step-body">
+                                    <strong>Blocks Finalize</strong>
+                                    <p>When the target block height is reached, the Game Master queries on-chain data to compute the actual metric value.</p>
+                                </div>
+                            </div>
+                            <div class="hiw-connector"></div>
+                            <div class="hiw-step">
+                                <div class="hiw-step-num">4</div>
+                                <div class="hiw-step-body">
+                                    <strong>Settlement</strong>
+                                    <p>The closest prediction wins. The escrow contract automatically releases staked tokens to the winner.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Stats -->
+                <div class="info-panel glass">
+                    <div class="panel-head">
+                        <h3><span class="head-icon">🌐</span> Network Stats</h3>
+                    </div>
+                    <div class="netstats-content">
+                        <div class="netstats-row">
+                            <span class="netstats-label">Nostr Relay</span>
+                            <span class="netstats-value mono" id="net-relay">wss://relay.snort.social</span>
+                        </div>
+                        <div class="netstats-row">
+                            <span class="netstats-label">Connection</span>
+                            <span class="netstats-value" id="net-conn-status">
+                                <span class="net-dot connected"></span> Connected
+                            </span>
+                        </div>
+                        <div class="netstats-row">
+                            <span class="netstats-label">Uptime</span>
+                            <span class="netstats-value mono" id="net-uptime">00:00:00</span>
+                        </div>
+                        <div class="netstats-row">
+                            <span class="netstats-label">Events Received</span>
+                            <span class="netstats-value mono" id="net-events">0</span>
+                        </div>
+                        <div class="netstats-row">
+                            <span class="netstats-label">Blockchain</span>
+                            <span class="netstats-value mono">Unicity Testnet v2</span>
+                        </div>
+                        <div class="netstats-row">
+                            <span class="netstats-label">Protocol</span>
+                            <span class="netstats-value mono">NIP-01 (Nostr)</span>
+                        </div>
+                        <div class="netstats-row">
+                            <span class="netstats-label">GM Pubkey</span>
+                            <span class="netstats-value mono truncate" id="net-gm-pk">b3d368…d985d</span>
                         </div>
                     </div>
                 </div>

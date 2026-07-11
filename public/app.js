@@ -200,6 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
         socket.onopen = () => {
             statusText.textContent = "Live · Nostr Relay";
             badge.classList.add("connected");
+            setNetworkConnected(true);
+            showToast('🔗', 'Connected', `Relay: ${RELAY_URL}`, 'settlement-toast');
 
             const subId = "predictabot_" + Math.floor(Math.random() * 100000);
             // Subscribe to ALL kind:1 events (both GM and Player)
@@ -211,6 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const data = JSON.parse(msg.data);
                 if (data[0] === "EVENT") {
+                    updateNetworkEvents();
                     handleEvent(data[2]);
                 }
             } catch (e) {}
@@ -219,6 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
         socket.onclose = () => {
             statusText.textContent = "Reconnecting...";
             badge.classList.remove("connected");
+            setNetworkConnected(false);
             setTimeout(connect, 3000);
         };
 
@@ -246,6 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             rounds.set(roundId, { metric, startBlock, endBlock, stake, time: event.created_at });
             renderRound(roundId, metric, startBlock, endBlock, stake, event.created_at);
+            showToast('⚡', `New Round: ${metricLabels[metric] || metric}`, `Blocks ${startBlock}→${endBlock} · Stake ${stake} UNI`, 'round-toast');
 
             // Update KPI with actual values from content
             const actualMatch = event.content.match(/Actual\s+(\w+):\s+([\d.]+)/);
@@ -277,6 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             renderIntent(intentId, playerPk, predVal, event.created_at);
             updateChartData(roundId, predVal, event.created_at);
+            showToast('🧠', `Prediction: ${isNaN(predVal) ? '?' : predVal.toLocaleString()}`, `Player ${pubkeyShort(playerPk)}`, 'intent-toast');
             updateLeaderboard();
 
             navIntents.textContent = totalIntentCount;
@@ -590,6 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Simulate round
                 rounds.set(roundId, { metric, startBlock: 1000 + roundNum, endBlock: 1010 + roundNum, stake: "1000", time: ts });
                 renderRound(roundId, metric, 1000 + roundNum, 1010 + roundNum, "1000", ts);
+                showToast('⚡', `New Round: ${metricLabels[metric] || metric}`, `Blocks ${1000+roundNum}→${1010+roundNum} · 1,000 UNI`, 'round-toast');
                 navRounds.textContent = rounds.size;
                 roundsCount.textContent = rounds.size;
 
@@ -602,6 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 predictionSum += predVal;
                 addPlayerScore(fakePk, Math.random() > 0.7);
                 renderIntent(`intent_${roundNum}`, fakePk, predVal, ts);
+                showToast('🧠', `Prediction: ${predVal.toLocaleString()}`, `Player ${pubkeyShort(fakePk)}`, 'intent-toast');
 
                 // Chart data
                 const md = metricData[metric];
@@ -625,8 +633,71 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // === TOAST NOTIFICATIONS ===
+    const toastContainer = document.getElementById('toast-container');
+
+    function showToast(icon, title, desc, type) {
+        if (!toastContainer) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <span class="toast-icon">${icon}</span>
+            <div class="toast-body">
+                <div class="toast-title">${title}</div>
+                <div class="toast-desc">${desc}</div>
+            </div>
+            <div class="toast-progress"></div>
+        `;
+        toastContainer.appendChild(toast);
+
+        // Auto-remove after 4 seconds
+        setTimeout(() => {
+            toast.style.animation = 'toastOut 0.4s ease forwards';
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
+
+        // Keep max 4 toasts
+        while (toastContainer.children.length > 4) {
+            toastContainer.firstChild.remove();
+        }
+    }
+
+    // === NETWORK STATS ===
+    const netUptime = document.getElementById('net-uptime');
+    const netEvents = document.getElementById('net-events');
+    const netConnStatus = document.getElementById('net-conn-status');
+    let connectedAt = null;
+    let totalEventsReceived = 0;
+
+    function startUptimeTimer() {
+        setInterval(() => {
+            if (!connectedAt || !netUptime) return;
+            const elapsed = Math.floor((Date.now() - connectedAt) / 1000);
+            const h = Math.floor(elapsed / 3600).toString().padStart(2, '0');
+            const m = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+            const s = (elapsed % 60).toString().padStart(2, '0');
+            netUptime.textContent = `${h}:${m}:${s}`;
+        }, 1000);
+    }
+
+    function updateNetworkEvents() {
+        totalEventsReceived++;
+        if (netEvents) netEvents.textContent = totalEventsReceived.toLocaleString();
+    }
+
+    function setNetworkConnected(connected) {
+        if (!netConnStatus) return;
+        if (connected) {
+            connectedAt = Date.now();
+            netConnStatus.innerHTML = '<span class="net-dot connected"></span> Connected';
+        } else {
+            netConnStatus.innerHTML = '<span class="net-dot"></span> Disconnected';
+        }
+    }
+
     // === INIT ===
     initParticles();
     connect();
     startDemoMode();
+    startUptimeTimer();
 });

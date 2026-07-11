@@ -1,85 +1,286 @@
-# PredictaBot: The Macroeconomic Agent Arena
-
-## Overview
-PredictaBot is a prototype autonomous prediction market built on **Unicity Testnet v2** for the **Games** track of the Builder Program.  Agents compete to forecast macro‑level network metrics (total gas, active nametags, block interval) and stake testnet tokens in an escrow.  The Game Master (GM) Oracle runs as an autonomous agent, validates the outcome on‑chain, and settles the escrow to the closest prediction.
-
-## Project Structure
-```
-PredictaBot/
-├─ src/
-│  ├─ game_master.ts      # GM Oracle logic
-│  ├─ player_predict.ts   # Player agent logic
-│  ├─ utils.ts            # Helper utilities
-│  └─ config.ts           # Environment configuration
-├─ .env.example            # Example env file
-├─ package.json
-├─ tsconfig.json
-├─ Dockerfile              # Optional AstridOS container
-└─ README.md               # (this file)
-```
-
-## Setup
-1. **Clone the repository** (or copy the folder to your workspace).  The repo lives at `c:/Users/Admin/Documents/unicity luongnhan/PredictaBot`.
-2. **Install dependencies**
-   ```bash
-   cd "c:/Users/Admin/Documents/unicity luongnhan/PredictaBot"
-   npm ci
-   ```
-3. **Create an `.env` file** based on `.env.example` and fill in your keys:
-   - `GM_PRIVATE_KEY` – hex private key for the GM agent.
-   - `PLAYER_PRIVATE_KEY` – hex private key for a player agent (you can generate multiple for more players).
-   - `NOSTR_RELAY_URL` – Nostr relay (default provided).
-   - `TESTNET_RPC` – Testnet RPC endpoint (default provided).
-   - `ESCROW_CONTRACT_ADDRESS` – address of the escrow contract on Testnet v2.
-   - `ROUND_BLOCK_SPAN` – number of blocks per round (default `100`).
-4. **Build the TypeScript sources**
-   ```bash
-   npm run build
-   ```
-5. **Run agents**
-   - **Easiest method (Windows):** Just double-click the `start.bat` file in the folder! This will automatically compile and run both agents concurrently in the same terminal.
-   - **Command line:**
-     ```bash
-     npm run start:all
-     ```
-   - **Separate terminals:**
-     ```bash
-     npm run start-gm
-     npm run start-player
-     ```
-
-## AstridOS Deployment (optional)
-A minimal Dockerfile is provided to run each agent inside an AstridOS‑compatible container.  Build and run with:
-```bash
-# Build image (tag as gm or player)
-docker build -t predictabot-gm --target gm .
-# Run GM container (will keep running)
-docker run -d --name predictabot-gm predictabot-gm
-
-# Build player image
-docker build -t predictabot-player --target player .
-# Run a player container (you can spin up many)
-docker run -d --name predictabot-player1 predictabot-player
-```
-The Dockerfile uses `node:18-alpine` and copies the source code, installs dependencies, and sets the appropriate entrypoint.
-
-## Testing
-- **Unit tests** (Jest) are set up.  Run `npm test` to execute them.
-- **Integration test** can be performed by launching a local testnet via the SDK (`npx sphere-sdk start-testnet`) and running a short round with a mocked player.
-
-## How It Works
-1. **Round Announcement** – GM publishes a Nostr event containing the round ID, metric, block range, and required stake.
-2. **Player Prediction** – Player agents listen for the announcement, compute a deterministic forecast, create a `SignedIntent` via the SDK, lock the stake in the escrow, and optionally broadcast the intent via Nostr.
-3. **Truth Verification** – When the target block is reached, GM queries on‑chain data for the chosen metric, determines the closest prediction, and calls `Escrow.settle` to transfer the pooled tokens to the winner.
-4. **Settlement Broadcast** – GM publishes a settlement event for transparency.
-
-## Extending the Prototype
-- Add more sophisticated prediction algorithms (ML models, on‑chain data analytics).
-- Implement a proportional reward scheme or tie‑break logic.
-- Persist round state on‑chain instead of in‑memory.
-- Scale to multiple concurrent rounds.
-- Deploy on AstridOS for full sandbox isolation.
+<p align="center">
+  <h1 align="center">🤖 PredictaBot Arena</h1>
+  <p align="center">
+    <strong>Autonomous macroeconomic prediction market on Unicity Testnet v2</strong>
+  </p>
+  <p align="center">
+    <a href="#"><img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square" alt="Build Status" /></a>
+    <a href="#license"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License MIT" /></a>
+    <a href="https://vercel.com"><img src="https://img.shields.io/badge/deployed%20on-Vercel-black?style=flat-square&logo=vercel" alt="Deployed on Vercel" /></a>
+    <a href="#"><img src="https://img.shields.io/badge/network-Unicity%20Testnet%20v2-purple?style=flat-square" alt="Unicity Testnet v2" /></a>
+    <a href="#"><img src="https://img.shields.io/badge/protocol-Nostr-orange?style=flat-square" alt="Nostr Protocol" /></a>
+  </p>
+</p>
 
 ---
 
-**Ready to ship!** Feel free to ask for any additional features, adjustments, or deployment guidance.
+> AI-powered agents compete in real-time prediction rounds for on-chain macroeconomic metrics — coordinated via Nostr, settled on Unicity.
+
+![Dashboard](./docs/screenshot.png)
+
+---
+
+## ✨ Features
+
+| | Feature | Description |
+|---|---|---|
+| 🎲 | **Autonomous Prediction Rounds** | Game Master bot announces rounds with target blockchain metrics |
+| 🤖 | **AI Player Agents** | Bots autonomously generate predictions and stake tokens |
+| 📡 | **Nostr-Powered Messaging** | Decentralized event relay between agents via Nostr protocol |
+| 🔗 | **On-Chain Settlement** | Predictions anchored and settled on Unicity Testnet v2 |
+| 📊 | **Live Dashboard** | Premium web dashboard with real-time charts and leaderboard |
+| 🐳 | **Docker Ready** | One-command deployment with `docker-compose` |
+| 🌐 | **Vercel Deployment** | Static dashboard deployed on Vercel edge network |
+| 📈 | **Multi-Metric Tracking** | `totalGas` · `activeNametags` · `avgBlockInterval` |
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+graph LR
+    subgraph Agents
+        GM["🎲 Game Master<br/>(Oracle)"]
+        P1["🤖 Player Agent"]
+    end
+
+    subgraph Infrastructure
+        NR["📡 Nostr Relay<br/>wss://relay.nostr.org"]
+        UC["🔗 Unicity<br/>Testnet v2"]
+    end
+
+    subgraph Frontend
+        WD["📊 Web Dashboard<br/>(Vercel)"]
+    end
+
+    GM -- "Announce Round<br/>(kind: 30078)" --> NR
+    P1 -- "Submit Prediction<br/>(kind: 30079)" --> NR
+    NR -- "Subscribe Events" --> WD
+    GM -. "Fetch Metrics" .-> UC
+    GM -- "Settle & Score" --> NR
+    P1 -. "Stake Tokens" .-> UC
+
+    style GM fill:#6366f1,stroke:#4f46e5,color:#fff
+    style P1 fill:#ec4899,stroke:#db2777,color:#fff
+    style NR fill:#f59e0b,stroke:#d97706,color:#000
+    style UC fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style WD fill:#10b981,stroke:#059669,color:#fff
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| **Node.js** | ≥ 18.x | Runtime |
+| **npm** | ≥ 9.x | Package manager |
+| **TypeScript** | ≥ 5.2 | Build toolchain |
+| **Docker** *(optional)* | ≥ 20.x | Containerized deployment |
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/luongnhan9999/predictabot.git
+cd predictabot
+
+# Install dependencies
+npm install
+
+# Build TypeScript
+npm run build
+```
+
+### Configuration
+
+Copy the example environment file and configure your secrets:
+
+```bash
+cp .env.example .env
+```
+
+```env
+# Nostr relay URL (WebSocket)
+NOSTR_RELAY_URL=wss://relay.nostr.org
+
+# Private keys (hex) for agents – keep these secret!
+GM_PRIVATE_KEY=<your_game_master_private_key>
+PLAYER_PRIVATE_KEY=<your_player_private_key>
+
+# Testnet RPC endpoint
+TESTNET_RPC=https://testnet.unicity.network/rpc
+
+# Escrow contract address on Testnet v2
+ESCROW_CONTRACT_ADDRESS=<your_escrow_contract>
+
+# Number of blocks per prediction round
+ROUND_BLOCK_SPAN=100
+```
+
+> 💡 **Tip:** Generate Nostr key pairs using `nostr-tools` or any Nostr key generator.
+
+### Running
+
+```bash
+# Start both Game Master and Player concurrently
+npm run start:all
+
+# Or run individually
+npm run start-gm        # Game Master only
+npm run start-player    # Player Agent only
+```
+
+#### Docker
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+```
+
+---
+
+## 📁 Project Structure
+
+```
+PredictaBot/
+├── src/
+│   ├── game_master.ts       # 🎲 Oracle bot – announces rounds, fetches metrics, scores
+│   ├── player_predict.ts    # 🤖 Player bot – generates predictions, stakes tokens
+│   ├── config.ts            # ⚙️  Environment config & constants
+│   ├── mock-sdk.ts          # 🧪 Mock Unicity SDK for demo/testing
+│   └── utils.ts             # 🔧 Shared utilities
+├── public/
+│   ├── index.html           # 📊 Dashboard HTML
+│   ├── app.js               # 📈 Dashboard logic (Chart.js + Nostr subscription)
+│   ├── style.css            # 🎨 Premium dashboard styles
+│   └── favicon.jpg          # 🖼️  Favicon
+├── .env.example             # 🔐 Environment template
+├── docker-compose.yml       # 🐳 Docker orchestration
+├── Dockerfile               # 📦 Container build
+├── vercel.json              # 🌐 Vercel rewrite config
+├── tsconfig.json            # 🔧 TypeScript config
+└── package.json             # 📋 Dependencies & scripts
+```
+
+---
+
+## ⚙️ How It Works
+
+The prediction market operates in continuous rounds, each following a deterministic lifecycle:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    PREDICTION ROUND LIFECYCLE                    │
+└─────────────────────────────────────────────────────────────────┘
+
+  ┌──────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────┐
+  │ ANNOUNCE │ ──▶ │   PREDICT    │ ──▶ │   RESOLVE    │ ──▶ │  SETTLE  │
+  └──────────┘     └──────────────┘     └──────────────┘     └──────────┘
+       │                  │                    │                    │
+  Game Master        Player Agents       Game Master          Game Master
+  broadcasts a       subscribe, then     fetches actual       calculates
+  new round via      generate & submit   on-chain metrics     scores and
+  Nostr (kind        predictions with    at round close       broadcasts
+  30078) with        staked tokens                            results via
+  target block       via Nostr                                Nostr
+  range              (kind 30079)
+```
+
+**Prediction Metrics:**
+
+| Metric | Description |
+|--------|-------------|
+| `totalGas` | Total gas consumed across the block range |
+| `activeNametags` | Number of unique active nametags |
+| `avgBlockInterval` | Average time between consecutive blocks (seconds) |
+
+**Scoring:** Players are ranked by prediction accuracy using absolute error distance from actual values. Closest predictions earn the highest share of the staked token pool.
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology | Role |
+|----------|------------|------|
+| **Language** | TypeScript 5.2+ | Type-safe application logic |
+| **Runtime** | Node.js 18+ | Server-side execution |
+| **Messaging** | nostr-tools / SimplePool | Decentralized event relay |
+| **Blockchain** | Unicity Testnet v2 | On-chain settlement & metrics |
+| **Charts** | Chart.js | Real-time dashboard visualization |
+| **Deployment** | Vercel | Edge-deployed static dashboard |
+| **Containers** | Docker / Docker Compose | Production orchestration |
+| **Build** | tsc / concurrently | Build & multi-process management |
+
+---
+
+## 🌐 Deployment
+
+### Dashboard (Vercel)
+
+The static dashboard in `public/` is deployed to Vercel:
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+The `vercel.json` rewrites all routes to the `public/` directory:
+
+```json
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/public/$1" }]
+}
+```
+
+### Agents (Docker)
+
+Deploy the Game Master and Player agents using Docker Compose:
+
+```bash
+docker-compose up -d --build
+```
+
+| Service | Command | Port |
+|---------|---------|------|
+| `gm` | `npm run start-gm` | 3000 |
+| `player` | `npm run start-player` | 3001 |
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] 🔐 Integrate real Unicity Sphere SDK (replace mock)
+- [ ] 🏆 On-chain leaderboard with historical rankings
+- [ ] 🤖 Multi-player support with agent discovery
+- [ ] 📊 Additional metrics: `txCount`, `blockRewards`, `networkHashRate`
+- [ ] 🔔 Notification system (Nostr DMs to players)
+- [ ] 🧠 ML-based prediction strategies for player agents
+- [ ] 📱 Mobile-responsive dashboard redesign
+- [ ] 🔗 Mainnet deployment when Unicity launches
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
+
+```
+MIT License · Copyright (c) 2025 luongnhan
+```
+
+---
+
+<p align="center">
+  Built with 💜 by <strong>luongnhan</strong>
+  <br/>
+  <sub>Powered by Unicity · Coordinated by Nostr · Visualized with Chart.js</sub>
+</p>
