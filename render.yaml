@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: predictabot-backend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:all
+    plan: free
