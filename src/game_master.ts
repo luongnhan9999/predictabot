@@ -140,8 +140,20 @@ async function fetchPredictions(roundId: string): Promise<Intent[]> {
   return intents as unknown as Intent[];
 }
 
+import * as http from "http";
+
 async function main() {
   console.log("Game Master agent started.");
+
+  // Simple HTTP server to bind to port for hosting on platforms like Render
+  const port = process.env.PORT || 3000;
+  http.createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("PredictaBot Backend Bots are running!");
+  }).listen(port, () => {
+    console.log(`Dummy HTTP server running on port ${port} to keep host alive`);
+  });
+
   console.log("Waiting 3s for Nostr relay connections...");
   await new Promise(resolve => setTimeout(resolve, 3000));
 
