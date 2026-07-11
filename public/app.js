@@ -383,23 +383,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // === RENDER ROUND CARD ===
+    const metricIcons = { totalGas: "⛽", activeNametags: "🏷️", avgBlockInterval: "⏱️" };
+    const metricLabels = { totalGas: "Total Gas", activeNametags: "Nametags", avgBlockInterval: "Block Interval" };
+
     function renderRound(id, metric, startBlock, endBlock, stake, timestamp) {
         clearEmptyState(roundsContainer);
 
+        const icon = metricIcons[metric] || "📊";
+        const label = metricLabels[metric] || metric;
+        const shortId = id.replace("round-", "").replace("demo-round-", "#");
+        const blockCount = (Number(endBlock) - Number(startBlock) + 1) || "?";
+
         const card = document.createElement("div");
-        card.className = "event-card round";
+        card.className = "round-card";
         card.innerHTML = `
-            <div class="card-top">
-                <span class="card-type">Round</span>
-                <span class="card-hash">${id.substring(0, 12)}…</span>
-                <span class="card-time">${formatTime(timestamp)}</span>
-            </div>
-            <div class="card-mid">
-                <div>
-                    <span class="card-metric-badge">${metric}</span>
-                    <div class="card-blocks" style="margin-top:6px">Blocks ${startBlock}→${endBlock}</div>
+            <div class="round-header">
+                <div class="round-id-wrap">
+                    <span class="round-icon">${icon}</span>
+                    <span class="round-id">${shortId}</span>
                 </div>
-                <span class="card-stake">${stake} UNI</span>
+                <span class="round-time">${formatTime(timestamp)}</span>
+            </div>
+            <div class="round-body">
+                <div class="round-metric">
+                    <span class="round-metric-label">Metric</span>
+                    <span class="round-metric-value">${label}</span>
+                </div>
+                <div class="round-blocks">
+                    <span class="round-blocks-label">Blocks</span>
+                    <span class="round-blocks-value">${startBlock} → ${endBlock} <span class="round-blocks-count">(${blockCount})</span></span>
+                </div>
+            </div>
+            <div class="round-footer">
+                <div class="round-stake">
+                    <span class="round-stake-icon">💰</span>
+                    <span class="round-stake-amount">${Number(stake).toLocaleString()} UNI</span>
+                </div>
+                <span class="round-status">● Live</span>
             </div>
         `;
         roundsContainer.prepend(card);
