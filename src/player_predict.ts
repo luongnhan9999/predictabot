@@ -5,7 +5,7 @@
  * Player Agent – autonomously generates a prediction and stakes it in the escrow.
  */
 
-import { SDK, Escrow, Intent, Wallet } from "@unicity/sphere-sdk";
+import { SDK, Escrow, Intent, Wallet } from "./mock-sdk";
 import { SimplePool, signEvent } from "nostr-tools";
 import { NOSTR_RELAY_URL, PLAYER_PRIVATE_KEY, TESTNET_RPC, ESCROW_CONTRACT_ADDRESS } from "./config";
 import { placeholderPredict, roundTo } from "./utils";
@@ -76,17 +76,47 @@ function subscribeToRounds() {
   sub.on("eose", () => console.log("Subscribed to round announcements"));
 }
 
+// Memory to simulate a "moving average" or trend tracking strategy
+const metricHistory: Record<string, number> = {};
+
 function computePrediction(metric: string): number {
+  // Base ranges for metrics
+  let baseValue = 0;
+  let variance = 0;
+  
   switch (metric) {
     case "totalGas":
-      return placeholderPredict(metric, [100000, 500000]);
+      baseValue = 250000;
+      variance = 50000;
+      break;
     case "activeNametags":
-      return placeholderPredict(metric, [50, 200]);
+      baseValue = 125;
+      variance = 25;
+      break;
     case "avgBlockInterval":
-      return placeholderPredict(metric, [1, 5]);
+      baseValue = 3;
+      variance = 1;
+      break;
     default:
       return 0;
   }
+
+  // Simulate a trend-following bot
+  if (!metricHistory[metric]) {
+    metricHistory[metric] = baseValue;
+  }
+  
+  // Random walk based on previous value to simulate realistic market fluctuations
+  const fluctuation = (Math.random() * variance * 2) - variance;
+  const newValue = metricHistory[metric] + fluctuation;
+  
+  // Ensure we don't drop below 0
+  const finalPrediction = Math.max(0, Math.round(newValue));
+  
+  // Update memory
+  metricHistory[metric] = finalPrediction;
+  
+  return finalPrediction;
 }
 
 function main() {

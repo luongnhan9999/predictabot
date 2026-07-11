@@ -11,7 +11,7 @@
  *   5. Determine the winning prediction and settle the escrow.
  */
 
-import { SDK, Escrow, Intent, Wallet } from "@unicity/sphere-sdk";
+import { SDK, Escrow, Intent, Wallet } from "./mock-sdk";
 import { SimplePool, signEvent } from "nostr-tools";
 import { NOSTR_RELAY_URL, GM_PRIVATE_KEY, TESTNET_RPC, ESCROW_CONTRACT_ADDRESS, ROUND_BLOCK_SPAN } from "./config";
 import { nextRoundId, distance } from "./utils";

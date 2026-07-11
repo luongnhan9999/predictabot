@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  gm:
+    build: .
+    command: npm run start-gm
+    env_file: .env
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # optional, expose if needed
+
+  player:
+    build: .
+    command: npm run start-player
+    env_file: .env
+    restart: unless-stopped
+    ports:
+      - "3001:3000" # optional, expose if needed

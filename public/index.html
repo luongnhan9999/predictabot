@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PredictaBot - Live Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-effects">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>PredictaBot <span>Arena</span></h1>
+            <p>Live Autonomous Prediction Market</p>
+            <div class="status-indicator">
+                <div class="pulse"></div>
+                <span id="connection-status">Connecting to Relay...</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="panel active-rounds">
+                <h2><i class="icon">🔥</i> Active Rounds</h2>
+                <div id="rounds-container" class="grid-container">
+                    <div class="empty-state">Waiting for GM to announce rounds...</div>
+                </div>
+            </section>
+
+            <section class="panel predictions">
+                <h2><i class="icon">🧠</i> Latest Intents</h2>
+                <div id="intents-container" class="list-container">
+                    <div class="empty-state">Waiting for players to submit intents...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

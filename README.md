@@ -37,12 +37,14 @@ PredictaBot/
    npm run build
    ```
 5. **Run agents**
-   - Start the GM Oracle:
+   - **Easiest method (Windows):** Just double-click the `start.bat` file in the folder! This will automatically compile and run both agents concurrently in the same terminal.
+   - **Command line:**
+     ```bash
+     npm run start:all
+     ```
+   - **Separate terminals:**
      ```bash
      npm run start-gm
-     ```
-   - In a separate terminal, start one or more Player agents (you can run multiple instances with different wallets):
-     ```bash
      npm run start-player
      ```
 

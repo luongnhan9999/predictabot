@@ -5,22 +5,25 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start-gm": "ts-node src/game_master.ts",
-    "start-player": "ts-node src/player_predict.ts",
+    "start:all": "concurrently -n \"GM,PLAYER\" -c \"bgBlue.bold,bgMagenta.bold\" \"node dist/game_master.js\" \"node dist/player_predict.js\"",
+    "start-gm": "node dist/game_master.js",
+    "start-player": "node dist/player_predict.js",
     "test": "jest"
   },
   "author": "Your Name <you@example.com>",
   "license": "MIT",
   "dependencies": {
     "@unicity/sphere-sdk": "git+https://github.com/unicity-sphere/sphere-sdk.git",
-    "nostr-tools": "^1.15.0",
+    "@unicitylabs/sphere-sdk": "file:sphere-sdk",
+    "axios": "^1.5.0",
     "dotenv": "^16.0.0",
-    "axios": "^1.5.0"
+    "nostr-tools": "^1.15.0"
   },
   "devDependencies": {
-    "typescript": "^5.2.0",
-    "ts-node": "^10.9.0",
+    "@types/jest": "^29.5.0",
+    "concurrently": "^10.0.3",
     "jest": "^29.7.0",
-    "@types/jest": "^29.5.0"
+    "ts-node": "^10.9.0",
+    "typescript": "^5.2.0"
   }
 }
