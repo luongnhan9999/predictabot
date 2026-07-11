@@ -12,7 +12,7 @@
  */
 
 import { SDK, Escrow, Intent, Wallet } from "./mock-sdk";
-import { SimplePool, signEvent } from "nostr-tools";
+import { SimplePool, getEventHash, getSignature } from "nostr-tools";
 import { NOSTR_RELAY_URL, GM_PRIVATE_KEY, TESTNET_RPC, ESCROW_CONTRACT_ADDRESS, ROUND_BLOCK_SPAN } from "./config";
 import { nextRoundId, distance } from "./utils";
 
@@ -71,8 +71,10 @@ async function announceRound(metric: string) {
     pubkey: gmWallet.getPublicKey()
   } as any;
 
-  const signed = signEvent(event, GM_PRIVATE_KEY);
-  await publish(signed);
+  event.id = getEventHash(event);
+  event.sig = getSignature(event, GM_PRIVATE_KEY);
+  
+  publish(event);
   console.log(`Announced round ${roundId}`);
   monitorRound(round);
 }
@@ -108,8 +110,9 @@ async function monitorRound(round: RoundSpec) {
       content: `Round ${round.roundId} settled. Winner: ${winnerAddress}`,
       pubkey: gmWallet.getPublicKey()
     } as any;
-    const signedSettle = signEvent(settleEvent, GM_PRIVATE_KEY);
-    await publish(signedSettle);
+    settleEvent.id = getEventHash(settleEvent);
+    settleEvent.sig = getSignature(settleEvent, GM_PRIVATE_KEY);
+    publish(settleEvent);
   } else {
     console.log(`No predictions received for round ${round.roundId}`);
   }

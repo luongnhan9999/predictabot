@@ -6,7 +6,7 @@
  */
 
 import { SDK, Escrow, Intent, Wallet } from "./mock-sdk";
-import { SimplePool, signEvent } from "nostr-tools";
+import { SimplePool, getEventHash, getSignature } from "nostr-tools";
 import { NOSTR_RELAY_URL, PLAYER_PRIVATE_KEY, TESTNET_RPC, ESCROW_CONTRACT_ADDRESS } from "./config";
 import { placeholderPredict, roundTo } from "./utils";
 
@@ -69,9 +69,10 @@ function subscribeToRounds() {
       content: `Player intent for round ${roundId}`,
       pubkey: playerWallet.getPublicKey()
     } as any;
-    const signed = (signEvent as any)(nostrEvent, PLAYER_PRIVATE_KEY);
+    nostrEvent.id = getEventHash(nostrEvent);
+    nostrEvent.sig = getSignature(nostrEvent, PLAYER_PRIVATE_KEY);
     try {
-      const pub = pool.publish([NOSTR_RELAY_URL], signed);
+      const pub = pool.publish([NOSTR_RELAY_URL], nostrEvent);
       if (Array.isArray(pub)) {
         pub.forEach(p => p.catch(() => {}));
       } else if (pub && typeof pub.catch === 'function') {
