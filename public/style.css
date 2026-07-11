@@ -376,8 +376,8 @@ body {
     display: grid;
     grid-template-columns: 1fr 380px;
     gap: 1rem;
-    flex: 1;
     min-height: 0;
+    max-height: 520px;
 }
 
 /* Chart Zone */
@@ -386,6 +386,8 @@ body {
     flex-direction: column;
     padding: 1.5rem;
     border-radius: var(--radius-lg);
+    max-height: 520px;
+    overflow: hidden;
 }
 
 .chart-toolbar {
