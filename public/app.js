@@ -688,36 +688,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const walletProfile = document.getElementById("wallet-profile");
     const walletAddress = document.getElementById("wallet-address");
     const walletBalance = document.getElementById("wallet-balance");
-    const walletModal = document.getElementById("wallet-modal");
-    const walletModalClose = document.getElementById("wallet-modal-close");
-    const walletOptionSphere = document.getElementById("wallet-option-sphere");
-    const SPHERE_API_KEY = "sk_99df313bab4f43d19dcc376c0bc09ab6"; // Demo provided key
 
-    function openWalletModal() {
-        if(walletModal) walletModal.classList.remove("hidden");
-    }
+    let popupWindow = null;
 
-    function closeWalletModal() {
-        if(walletModal) walletModal.classList.add("hidden");
-    }
-
-    function generateMockAddress() {
-        const chars = '0123456789abcdef';
-        let addr = 'b3';
-        for(let i = 0; i < 62; i++) {
-            addr += chars[Math.floor(Math.random() * 16)];
-        }
-        return addr;
-    }
-
-    function simulateWalletConnect() {
-        closeWalletModal();
-        const connectText = walletConnectBtn.innerHTML;
-        walletConnectBtn.innerHTML = '<span class="wallet-btn-icon">⏳</span> Connecting...';
+    function openWalletPopup() {
+        const width = 380;
+        const height = 620;
+        const left = (window.innerWidth - width) / 2 + window.screenX;
+        const top = (window.innerHeight - height) / 2 + window.screenY;
         
-        setTimeout(() => {
-            const address = generateMockAddress();
-            const balance = (Math.random() * 5000 + 1000).toFixed(2);
+        popupWindow = window.open('wallet-popup.html', 'SphereWalletConnect', `width=${width},height=${height},left=${left},top=${top}`);
+        
+        if (walletConnectBtn) {
+            walletConnectBtn.innerHTML = '<span class="wallet-btn-icon">⏳</span> Waiting...';
+        }
+    }
+
+    // Listen for messages from the popup window
+    window.addEventListener('message', (event) => {
+        // Ensure the message is from our own origin
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data && event.data.type === 'SPHERE_WALLET_CONNECTED') {
+            const { address, balance } = event.data;
             const shortAddr = address.substring(0, 6) + "..." + address.substring(address.length - 4);
             
             // Save to state
@@ -726,9 +719,9 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("sphere_wallet_balance", balance);
             
             showWalletProfile(shortAddr, balance);
-            showToast("👛", "Wallet Connected", `Connected to Sphere via API Key`, "success");
-        }, 1500);
-    }
+            showToast("👛", "Wallet Connected", `Connected via Sphere Extension`, "success");
+        }
+    });
 
     function showWalletProfile(shortAddr, balance) {
         if(walletConnectBtn) walletConnectBtn.classList.add("hidden");
@@ -763,9 +756,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Wallet Event Listeners
-    if (walletConnectBtn) walletConnectBtn.addEventListener("click", openWalletModal);
-    if (walletModalClose) walletModalClose.addEventListener("click", closeWalletModal);
-    if (walletOptionSphere) walletOptionSphere.addEventListener("click", simulateWalletConnect);
+    if (walletConnectBtn) walletConnectBtn.addEventListener("click", openWalletPopup);
     if (walletProfile) walletProfile.addEventListener("click", () => {
         if(confirm("Disconnect Sphere Wallet?")) {
             disconnectWallet();
