@@ -1191,8 +1191,209 @@ body {
     to { transform: scaleX(0); }
 }
 
-
 /* ================================================
+   WALLET UI
+   ================================================ */
+.wallet-section {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+}
+
+.wallet-btn {
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    color: var(--text-primary);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.wallet-btn:hover {
+    background: rgba(168, 85, 247, 0.25);
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+    transform: translateY(-1px);
+}
+
+.wallet-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
+    padding: 0.2rem 0.8rem 0.2rem 0.2rem;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wallet-profile:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.wallet-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--gradient-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.wallet-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.wallet-address {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.wallet-balance {
+    font-size: 0.65rem;
+    color: var(--accent-cyan);
+    font-weight: 700;
+}
+
+/* Modal */
+.wallet-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wallet-modal.hidden {
+    display: none;
+}
+
+.wallet-modal-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.wallet-modal-content {
+    position: relative;
+    width: 340px;
+    border-radius: 16px;
+    padding: 1.5rem;
+    animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.wallet-modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.wallet-modal-close:hover {
+    color: var(--text-primary);
+}
+
+.wallet-modal-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.wallet-modal-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.wallet-modal-header h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+}
+
+.wallet-modal-header p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.wallet-option {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 0.8rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wallet-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.wallet-option-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+}
+
+.wallet-option-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.wallet-option-text strong {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.wallet-option-text span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.wallet-option-arrow {
+    color: var(--text-secondary);
+    font-weight: bold;
+}
+
+.wallet-modal-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.secure-badge {
+    font-size: 0.7rem;
+    color: var(--accent-green);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+}/* ================================================
    RESPONSIVE
    ================================================ */
 @media (max-width: 1280px) {

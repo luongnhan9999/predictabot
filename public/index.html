@@ -40,6 +40,32 @@
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
 
+    <!-- Sphere Wallet Modal -->
+    <div id="wallet-modal" class="wallet-modal hidden">
+        <div class="wallet-modal-overlay"></div>
+        <div class="wallet-modal-content glass">
+            <button id="wallet-modal-close" class="wallet-modal-close">×</button>
+            <div class="wallet-modal-header">
+                <div class="wallet-modal-icon">👛</div>
+                <h3>Connect Sphere Wallet</h3>
+                <p>Login to interact with PredictaBot Arena</p>
+            </div>
+            <div class="wallet-modal-body">
+                <div class="wallet-option" id="wallet-option-sphere">
+                    <img src="favicon.jpg" alt="Sphere" class="wallet-option-img">
+                    <div class="wallet-option-text">
+                        <strong>Sphere Browser Extension</strong>
+                        <span>Connect automatically</span>
+                    </div>
+                    <div class="wallet-option-arrow">→</div>
+                </div>
+            </div>
+            <div class="wallet-modal-footer">
+                <span class="secure-badge">🔒 Encrypted Connection</span>
+            </div>
+        </div>
+    </div>
+
     <div class="app-shell">
         <!-- ===== TOP NAV BAR ===== -->
         <nav class="topbar glass">
@@ -81,6 +107,20 @@
                     <div class="nav-stat">
                         <span class="nav-stat-label">Intents</span>
                         <span class="nav-stat-value" id="nav-intents">0</span>
+                    </div>
+                </div>
+                <div class="wallet-section" id="wallet-section">
+                    <button class="wallet-btn" id="wallet-connect-btn">
+                        <span class="wallet-btn-icon">👛</span> Connect Sphere
+                    </button>
+                    <div class="wallet-profile hidden" id="wallet-profile">
+                        <div class="wallet-avatar">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="wallet-info">
+                            <span class="wallet-address" id="wallet-address">...</span>
+                            <span class="wallet-balance" id="wallet-balance">-- UCT</span>
+                        </div>
                     </div>
                 </div>
                 <div class="connection-badge" id="connection-badge">

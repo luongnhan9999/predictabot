@@ -683,6 +683,98 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // === WALLET INTEGRATION ===
+    const walletConnectBtn = document.getElementById("wallet-connect-btn");
+    const walletProfile = document.getElementById("wallet-profile");
+    const walletAddress = document.getElementById("wallet-address");
+    const walletBalance = document.getElementById("wallet-balance");
+    const walletModal = document.getElementById("wallet-modal");
+    const walletModalClose = document.getElementById("wallet-modal-close");
+    const walletOptionSphere = document.getElementById("wallet-option-sphere");
+    const SPHERE_API_KEY = "sk_99df313bab4f43d19dcc376c0bc09ab6"; // Demo provided key
+
+    function openWalletModal() {
+        if(walletModal) walletModal.classList.remove("hidden");
+    }
+
+    function closeWalletModal() {
+        if(walletModal) walletModal.classList.add("hidden");
+    }
+
+    function generateMockAddress() {
+        const chars = '0123456789abcdef';
+        let addr = 'b3';
+        for(let i = 0; i < 62; i++) {
+            addr += chars[Math.floor(Math.random() * 16)];
+        }
+        return addr;
+    }
+
+    function simulateWalletConnect() {
+        closeWalletModal();
+        const connectText = walletConnectBtn.innerHTML;
+        walletConnectBtn.innerHTML = '<span class="wallet-btn-icon">⏳</span> Connecting...';
+        
+        setTimeout(() => {
+            const address = generateMockAddress();
+            const balance = (Math.random() * 5000 + 1000).toFixed(2);
+            const shortAddr = address.substring(0, 6) + "..." + address.substring(address.length - 4);
+            
+            // Save to state
+            localStorage.setItem("sphere_wallet_connected", "true");
+            localStorage.setItem("sphere_wallet_address", address);
+            localStorage.setItem("sphere_wallet_balance", balance);
+            
+            showWalletProfile(shortAddr, balance);
+            showToast("👛", "Wallet Connected", `Connected to Sphere via API Key`, "success");
+        }, 1500);
+    }
+
+    function showWalletProfile(shortAddr, balance) {
+        if(walletConnectBtn) walletConnectBtn.classList.add("hidden");
+        if(walletProfile) {
+            walletProfile.classList.remove("hidden");
+            if(walletAddress) walletAddress.textContent = shortAddr;
+            if(walletBalance) walletBalance.textContent = balance + " UCT";
+        }
+    }
+
+    function disconnectWallet() {
+        localStorage.removeItem("sphere_wallet_connected");
+        localStorage.removeItem("sphere_wallet_address");
+        localStorage.removeItem("sphere_wallet_balance");
+        
+        if(walletProfile) walletProfile.classList.add("hidden");
+        if(walletConnectBtn) {
+            walletConnectBtn.classList.remove("hidden");
+            walletConnectBtn.innerHTML = '<span class="wallet-btn-icon">👛</span> Connect Sphere';
+        }
+        showToast("🔌", "Wallet Disconnected", "Sphere wallet session ended", "info");
+    }
+
+    function checkWalletState() {
+        const isConnected = localStorage.getItem("sphere_wallet_connected");
+        if (isConnected === "true") {
+            const address = localStorage.getItem("sphere_wallet_address");
+            const balance = localStorage.getItem("sphere_wallet_balance");
+            const shortAddr = address.substring(0, 6) + "..." + address.substring(address.length - 4);
+            showWalletProfile(shortAddr, balance);
+        }
+    }
+
+    // Wallet Event Listeners
+    if (walletConnectBtn) walletConnectBtn.addEventListener("click", openWalletModal);
+    if (walletModalClose) walletModalClose.addEventListener("click", closeWalletModal);
+    if (walletOptionSphere) walletOptionSphere.addEventListener("click", simulateWalletConnect);
+    if (walletProfile) walletProfile.addEventListener("click", () => {
+        if(confirm("Disconnect Sphere Wallet?")) {
+            disconnectWallet();
+        }
+    });
+    
+    // Check initial state
+    checkWalletState();
+
     // === INIT ===
     initParticles();
     connect();
