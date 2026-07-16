@@ -1,3 +1,6 @@
+import { autoConnect } from '@unicitylabs/sphere-sdk/connect/browser';
+import { SPHERE_NETWORKS } from '@unicitylabs/sphere-sdk/connect';
+
 /* =============================================
    PREDICTABOT ARENA — PREMIUM DARK DASHBOARD
    app.js — Full interactive frontend
@@ -689,28 +692,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const walletAddress = document.getElementById("wallet-address");
     const walletBalance = document.getElementById("wallet-balance");
 
-    let popupWindow = null;
-
-    function openWalletPopup() {
-        const width = 380;
-        const height = 620;
-        const left = (window.innerWidth - width) / 2 + window.screenX;
-        const top = (window.innerHeight - height) / 2 + window.screenY;
-        
-        popupWindow = window.open('wallet-popup.html', 'SphereWalletConnect', `width=${width},height=${height},left=${left},top=${top}`);
-        
+    async function connectSphere() {
         if (walletConnectBtn) {
-            walletConnectBtn.innerHTML = '<span class="wallet-btn-icon">⏳</span> Waiting...';
+            walletConnectBtn.innerHTML = '<span class="wallet-btn-icon">⏳</span> Connecting...';
+            walletConnectBtn.disabled = true;
         }
-    }
 
-    // Listen for messages from the popup window
-    window.addEventListener('message', (event) => {
-        // Ensure the message is from our own origin
-        if (event.origin !== window.location.origin) return;
-        
-        if (event.data && event.data.type === 'SPHERE_WALLET_CONNECTED') {
-            const { address, balance } = event.data;
+        try {
+            const result = await autoConnect({
+                dapp: {
+                    name: 'PredictaBot Arena',
+                    description: 'Autonomous macroeconomic prediction market',
+                    url: window.location.origin,
+                },
+                walletUrl: 'https://sphere.unicity.network',   // Testnet
+                network: SPHERE_NETWORKS.testnet2,            // BẮT BUỘC cho testnet
+                silent: false,   // Thử reconnect tự động mà không hiện popup nếu đã approve
+            });
+
+            console.log('Connected!', result.connection.identity);
+            const address = result.connection.identity;
+
+            // Sử dụng client
+            const balanceResult = await result.client.query('sphere_getBalance');
+            const balance = balanceResult ? (parseFloat(balanceResult) / 1e9).toFixed(2) : "0.00"; 
+            console.log('Balance:', balance);
+
             const shortAddr = address.substring(0, 6) + "..." + address.substring(address.length - 4);
             
             // Save to state
@@ -720,8 +727,43 @@ document.addEventListener("DOMContentLoaded", () => {
             
             showWalletProfile(shortAddr, balance);
             showToast("👛", "Wallet Connected", `Connected via Sphere Extension`, "success");
+
+            return result;
+        } catch (err) {
+            console.error('Connect failed', err);
+            if (walletConnectBtn) {
+                walletConnectBtn.innerHTML = '<span class="wallet-btn-icon">👛</span> Connect Sphere';
+                walletConnectBtn.disabled = false;
+            }
+            showToast("⚠️", "Connection Failed", "Could not connect to Sphere Wallet", "error");
         }
-    });
+    }
+
+    async function silentConnectSphere() {
+        try {
+            const result = await autoConnect({
+                dapp: {
+                    name: 'PredictaBot Arena',
+                    description: 'Autonomous macroeconomic prediction market',
+                    url: window.location.origin,
+                },
+                walletUrl: 'https://sphere.unicity.network',   
+                network: SPHERE_NETWORKS.testnet2,            
+                silent: true,
+            });
+
+            if(result && result.connection) {
+                const address = result.connection.identity;
+                const balanceResult = await result.client.query('sphere_getBalance');
+                const balance = balanceResult ? (parseFloat(balanceResult) / 1e9).toFixed(2) : "0.00"; 
+
+                const shortAddr = address.substring(0, 6) + "..." + address.substring(address.length - 4);
+                showWalletProfile(shortAddr, balance);
+            }
+        } catch (err) {
+            console.log('Silent connect failed or no active session');
+        }
+    }
 
     function showWalletProfile(shortAddr, balance) {
         if(walletConnectBtn) walletConnectBtn.classList.add("hidden");
@@ -756,7 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Wallet Event Listeners
-    if (walletConnectBtn) walletConnectBtn.addEventListener("click", openWalletPopup);
+    if (walletConnectBtn) walletConnectBtn.addEventListener("click", connectSphere);
     if (walletProfile) walletProfile.addEventListener("click", () => {
         if(confirm("Disconnect Sphere Wallet?")) {
             disconnectWallet();
@@ -765,6 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Check initial state
     checkWalletState();
+    silentConnectSphere();
 
     // === INIT ===
     initParticles();

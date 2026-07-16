@@ -4,7 +4,8 @@
   "description": "Autonomous macroeconomic prediction market for Unicity Testnet v2",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run build:web",
+    "build:web": "esbuild public/app.js --bundle --outfile=public/bundle.js",
     "start:all": "concurrently -n \"GM,P1,P2,P3\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold,bgYellow.bold\" \"node dist/game_master.js\" \"node dist/player_predict.js\" \"node dist/player2_meanrev.js\" \"node dist/player3_momentum.js\"",
     "start-gm": "node dist/game_master.js",
     "start-player": "node dist/player_predict.js",
@@ -23,6 +24,7 @@
     "@types/jest": "^29.5.0",
     "@types/node": "^26.1.1",
     "concurrently": "^10.0.3",
+    "esbuild": "^0.28.1",
     "jest": "^29.7.0",
     "ts-node": "^10.9.0",
     "typescript": "^5.2.0"
